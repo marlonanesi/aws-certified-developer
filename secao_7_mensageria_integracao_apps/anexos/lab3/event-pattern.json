@@ -1,0 +1,7 @@
+{
+  "source": ["lab3.orders"],
+  "detail-type": ["OrderPlaced"],
+  "detail": {
+    "status": ["confirmed"]
+  }
+}

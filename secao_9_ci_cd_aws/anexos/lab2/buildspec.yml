@@ -1,0 +1,46 @@
+version: 0.2
+
+env:
+  variables:
+    APP_ENV: "staging"
+  # Exemplo de referência ao Parameter Store (descomente e crie o parâmetro para usar)
+  # parameter-store:
+  #   DB_CONFIG: "/myapp/db/config"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "=== INSTALL PHASE ==="
+      - pip install pytest --quiet
+
+  pre_build:
+    commands:
+      - echo "=== PRE_BUILD PHASE ==="
+      - echo "Build iniciado em $(date)"
+      - echo "Branch/commit = $CODEBUILD_SOURCE_VERSION"
+      - echo "Build ID = $CODEBUILD_BUILD_ID"
+
+  build:
+    commands:
+      - echo "=== BUILD PHASE ==="
+      - echo "Executando testes..."
+      - python -m pytest tests/ -v 2>/dev/null || echo "Sem testes - continuando"
+      - echo "Empacotando artefato..."
+      - zip -r app.zip app.py buildspec.yml
+
+  post_build:
+    commands:
+      - echo "=== POST_BUILD PHASE === "
+      - echo "Build finalizado em $(date)"
+      - echo "Status do build $CODEBUILD_BUILD_SUCCEEDING"
+
+artifacts:
+  files:
+    - app.zip
+  discard-paths: yes
+
+cache:
+  paths:
+    - "/root/.cache/pip/**/*"

@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lab 1 - Stack CloudFormation com S3, IAM e Lambda
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Ambiente de deployment
+
+Resources:
+
+  # Bucket S3 com versionamento habilitado 
+  AppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'lab1-app-bucket-${EnvironmentName}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: ManagedBy
+          Value: CloudFormation
+        - Key: Version
+          Value: v2          
+
+  # Role IAM para execução da Lambda 
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'lab1-lambda-role-${EnvironmentName}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3ReadPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt AppBucket.Arn
+                  - !Sub '${AppBucket.Arn}/*'
+
+  # Função Lambda com código inline
+  AppFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'lab1-function-${EnvironmentName}'
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref AppBucket
+          ENVIRONMENT: !Ref EnvironmentName
+      Code:
+        ZipFile: |
+          import os
+          import json
+
+          def handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps({
+                      'message': 'Hello from CloudFormation!',
+                      'bucket': os.environ['BUCKET_NAME'],
+                      'environment': os.environ['ENVIRONMENT']
+                  })
+              }
+
+Outputs:
+  BucketName:
+    Description: Nome do bucket S3 criado
+    Value: !Ref AppBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketName'
+
+  BucketArn:
+    Description: ARN do bucket S3
+    Value: !GetAtt AppBucket.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-BucketArn'
+
+  FunctionName:
+    Description: Nome da função Lambda
+    Value: !Ref AppFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionName'
+
+  FunctionArn:
+    Description: ARN da função Lambda
+    Value: !GetAtt AppFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionArn'

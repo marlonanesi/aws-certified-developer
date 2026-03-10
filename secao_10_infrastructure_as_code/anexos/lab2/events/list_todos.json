@@ -1,0 +1,6 @@
+{
+  "httpMethod": "GET",
+  "path": "/todos",
+  "queryStringParameters": null,
+  "body": null
+}

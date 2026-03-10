@@ -1,0 +1,46 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "ProcessarImagens",
+      "LambdaFunctionArn": "LAMBDA_ARN_PLACEHOLDER",
+      "Events": [
+        "s3:ObjectCreated:*"
+      ],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            },
+            {
+              "Name": "suffix",
+              "Value": ".jpg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Id": "ProcessarCSV",
+      "LambdaFunctionArn": "LAMBDA_ARN_PLACEHOLDER",
+      "Events": [
+        "s3:ObjectCreated:*"
+      ],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "data/"
+            },
+            {
+              "Name": "suffix",
+              "Value": ".csv"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+version: 0.2
+# buildspec_codeartifact.yml
+# Exemplo de buildspec que autentica no CodeArtifact antes de instalar dependências.
+# Use este arquivo como referência para atualizar o buildspec.yml do repositório.
+
+env:
+  variables:
+    CODEARTIFACT_DOMAIN: "minha-empresa"
+    CODEARTIFACT_REPO: "python-packages"
+    # Substitua pelo Account ID real ou use a variável de ambiente $AWS_ACCOUNT_ID
+    AWS_ACCOUNT_ID: "123456789012"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "=== Autenticando no CodeArtifact ==="
+      - aws codeartifact login
+          --tool pip
+          --domain $CODEARTIFACT_DOMAIN
+          --domain-owner $AWS_ACCOUNT_ID
+          --repository $CODEARTIFACT_REPO
+      - pip install mypackage-demo requests
+
+  build:
+    commands:
+      - echo "=== Build com dependências do CodeArtifact ==="
+      - python -c "import mypackage; print(mypackage.hello())"
+      - zip -r app.zip app.py buildspec.yml
+
+  post_build:
+    commands:
+      - echo "Build finalizado"
+
+artifacts:
+  files:
+    - app.zip
+  discard-paths: yes

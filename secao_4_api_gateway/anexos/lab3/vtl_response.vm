@@ -1,0 +1,20 @@
+## vtl_response.vm – Integration Response Mapping Template (Lab 3)
+## Cole este conteúdo no editor do API Gateway em:
+##   GET /transform → Integration Response → 200 → Mapping Templates → application/json
+
+## Envolve a resposta da Lambda em um envelope padronizado
+
+#set($inputRoot = $input.path('$'))
+
+{
+  "status": "success",
+  "data": {
+    "greeting"      : "$inputRoot.greeting",
+    "characterCount": $inputRoot.chars,
+    "processed"     : $inputRoot.processed
+  },
+  "meta": {
+    "requestId": "$context.requestId",
+    "stage"    : "$context.stage"
+  }
+}

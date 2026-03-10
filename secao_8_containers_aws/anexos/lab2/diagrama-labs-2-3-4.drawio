@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Labs 2-3-4 ECS Fargate" id="labs-2-3-4">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ========== COLUNA CENTRAL ========== -->
+
+        <!-- Internet / Usuário -->
+        <mxCell id="2" value="Internet / Usuário"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=12;"
+          vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- SG: dva-alb-sg (boundary) -->
+        <mxCell id="3" value="SG: dva-alb-sg&#xa;Inbound: HTTP 80 / 0.0.0.0/0"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;dashPattern=8 4;verticalAlign=top;fontSize=10;fontStyle=2;"
+          vertex="1" parent="1">
+          <mxGeometry x="330" y="110" width="380" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ALB -->
+        <mxCell id="4" value="&lt;b&gt;ALB: dva-demo-alb&lt;/b&gt;&#xa;Internet-facing | Listener HTTP:80"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="355" y="133" width="330" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Target Group -->
+        <mxCell id="5" value="&lt;b&gt;Target Group: dva-demo-tg&lt;/b&gt;&#xa;Type: IP addresses | HTTP / 8080 | Health check: /"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="355" y="240" width="330" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ECS Cluster (large boundary) -->
+        <mxCell id="6" value="&lt;b&gt;ECS Cluster: dva-demo-cluster (Fargate)&lt;/b&gt;"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontSize=12;"
+          vertex="1" parent="1">
+          <mxGeometry x="150" y="320" width="680" height="275" as="geometry" />
+        </mxCell>
+
+        <!-- ECS Service label -->
+        <mxCell id="7" value="ECS Service: dva-demo-service  |  Desired tasks: 2"
+          style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontStyle=1;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="165" y="347" width="440" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- SG: dva-ecs-sg (boundary inside cluster) -->
+        <mxCell id="8" value="SG: dva-ecs-sg | Inbound: TCP 8080 from dva-alb-sg | Outbound: Todo o tráfego / 0.0.0.0/0 (obrigatório)"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;dashPattern=8 4;verticalAlign=top;fontSize=10;fontStyle=2;"
+          vertex="1" parent="1">
+          <mxGeometry x="170" y="378" width="640" height="195" as="geometry" />
+        </mxCell>
+
+        <!-- AZ 1 label -->
+        <mxCell id="15" value="AZ 1"
+          style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontStyle=2;fontSize=10;fontColor=#6d8764;"
+          vertex="1" parent="1">
+          <mxGeometry x="193" y="400" width="50" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- AZ 2 label -->
+        <mxCell id="16" value="AZ 2"
+          style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontStyle=2;fontSize=10;fontColor=#6d8764;"
+          vertex="1" parent="1">
+          <mxGeometry x="557" y="400" width="50" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Task 1 -->
+        <mxCell id="9" value="&lt;b&gt;Task 1&lt;/b&gt;&#xa;Container: dva-demo-container&#xa;Image: dva-demo-app:v1.0.0&#xa;Port: 8080 | IP público: ON"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="193" y="424" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Task 2 -->
+        <mxCell id="10" value="&lt;b&gt;Task 2&lt;/b&gt;&#xa;Container: dva-demo-container&#xa;Image: dva-demo-app:v1.0.0&#xa;Port: 8080 | IP público: ON"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="557" y="424" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- CloudWatch Logs -->
+        <mxCell id="13" value="&lt;b&gt;CloudWatch Logs&lt;/b&gt;&#xa;/ecs/dva-demo-task"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="355" y="635" width="330" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ========== COLUNA DIREITA ========== -->
+
+        <!-- ECR -->
+        <mxCell id="11" value="&lt;b&gt;ECR: dva-demo-app&lt;/b&gt;&#xa;:v1.0.0&#xa;:v2.0.0 (Lab 4)"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="900" y="60" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- IAM Role -->
+        <mxCell id="12" value="&lt;b&gt;IAM Role&lt;/b&gt;&#xa;ecsTaskExecutionRole&#xa;AmazonECSTaskExecutionRolePolicy"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;"
+          vertex="1" parent="1">
+          <mxGeometry x="900" y="185" width="200" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- Lab 4 Rolling Deploy note -->
+        <mxCell id="14" value="&lt;b&gt;Lab 4 — Rolling Deploy&lt;/b&gt;&#xa;&#xa;1. Build e push :v2.0.0 no ECR&#xa;2. Nova revisão da Task Definition&#xa;3. Update service → nova revisão&#xa;4. ECS sobe tasks v2 antes de&#xa;    encerrar tasks v1&#xa;&#xa;Resultado: zero downtime"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;verticalAlign=top;align=left;spacingLeft=6;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="900" y="310" width="200" height="165" as="geometry" />
+        </mxCell>
+
+        <!-- ========== LEGENDA ========== -->
+
+        <mxCell id="23" value="Lab 2: IAM Role, SGs, ALB, Target Group"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="150" y="730" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="24" value="Lab 3: Cluster, Task Definition, Service"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="430" y="730" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="25" value="Lab 4: Rolling Deploy + Limpeza"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;"
+          vertex="1" parent="1">
+          <mxGeometry x="710" y="730" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ========== SETAS ========== -->
+
+        <!-- Internet → ALB -->
+        <mxCell id="30" value="HTTP 80"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;"
+          edge="1" source="2" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ALB → Target Group -->
+        <mxCell id="31" value=""
+          style="edgeStyle=orthogonalEdgeStyle;html=1;"
+          edge="1" source="4" target="5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Target Group → Task 1 -->
+        <mxCell id="32" value="HTTP 8080"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.2;exitY=1;exitDx=0;exitDy=0;"
+          edge="1" source="5" target="9" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Target Group → Task 2 -->
+        <mxCell id="33" value="HTTP 8080"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.8;exitY=1;exitDx=0;exitDy=0;"
+          edge="1" source="5" target="10" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ECR → ECS Cluster (ECS Agent pull images) -->
+        <mxCell id="34" value="pull images (HTTPS 443)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#d6b656;"
+          edge="1" source="11" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- IAM Role → ECS Cluster (autoriza ECS Agent) -->
+        <mxCell id="38" value="autoriza ECS Agent"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#d6b656;"
+          edge="1" source="12" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Task 1 → CloudWatch Logs -->
+        <mxCell id="36" value="logs (HTTPS 443)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#6c8ebf;"
+          edge="1" source="9" target="13" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Task 2 → CloudWatch Logs -->
+        <mxCell id="37" value="logs (HTTPS 443)"
+          style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#6c8ebf;"
+          edge="1" source="10" target="13" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

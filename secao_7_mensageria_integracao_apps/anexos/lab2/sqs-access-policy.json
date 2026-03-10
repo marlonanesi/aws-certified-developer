@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "sns.amazonaws.com"
+      },
+      "Action": "sqs:SendMessage",
+      "Resource": "ARN_DA_FILA",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "ARN_DO_TOPICO_SNS"
+        }
+      }
+    }
+  ]
+}

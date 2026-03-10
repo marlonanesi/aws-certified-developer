@@ -1,0 +1,8 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "mypackage-demo"
+version = "1.0.0"
+description = "Pacote de demonstração CodeArtifact DVA"

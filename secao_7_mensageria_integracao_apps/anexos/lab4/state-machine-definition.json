@@ -1,0 +1,82 @@
+{
+  "Comment": "Lab 4 - Fluxo de Processamento de Pedido",
+  "StartAt": "ValidarPedido",
+  "States": {
+    "ValidarPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:sa-east-1:<ACCOUNT_ID>:function:lab4-validate-order",
+      "Retry": [
+        {
+          "ErrorEquals": ["Exception"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "PedidoInvalido"
+        }
+      ],
+      "Next": "VerificarTipo"
+    },
+    "VerificarTipo": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.order_type",
+          "StringEquals": "premium",
+          "Next": "ProcessarPremiumComNotificacao"
+        }
+      ],
+      "Default": "ProcessarStandard"
+    },
+    "ProcessarPremiumComNotificacao": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "ProcessarPremium",
+          "States": {
+            "ProcessarPremium": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:sa-east-1:<ACCOUNT_ID>:function:lab4-process-premium",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "NotificarCliente",
+          "States": {
+            "NotificarCliente": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:sa-east-1:<ACCOUNT_ID>:function:lab4-notify-customer",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "AguardarConfirmacao"
+    },
+    "ProcessarStandard": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:sa-east-1:<ACCOUNT_ID>:function:lab4-process-standard",
+      "Next": "AguardarConfirmacao"
+    },
+    "AguardarConfirmacao": {
+      "Type": "Wait",
+      "Seconds": 5,
+      "Next": "FinalizarPedido"
+    },
+    "FinalizarPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:sa-east-1:<ACCOUNT_ID>:function:lab4-finalize-order",
+      "End": true
+    },
+    "PedidoInvalido": {
+      "Type": "Fail",
+      "Error": "ValidationError",
+      "Cause": "Order validation failed after retries"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+## vtl_request.vm – Integration Request Mapping Template (Lab 3)
+## Cole este conteúdo no editor do API Gateway em:
+##   GET /transform → Integration Request → Mapping Templates → application/json
+
+## Lê os query string parameters e os transforma em JSON para a Lambda
+
+#set($firstName = $input.params('firstName'))
+#set($lastName  = $input.params('lastName'))
+#set($fullName  = "${firstName} ${lastName}")
+#set($nameLength = $fullName.length())
+
+{
+  "fullName"  : "$fullName",
+  "firstName" : "$firstName",
+  "lastName"  : "$lastName",
+  "nameLength": $nameLength,
+  "requestId" : "$context.requestId",
+  "stage"     : "$context.stage"
+}

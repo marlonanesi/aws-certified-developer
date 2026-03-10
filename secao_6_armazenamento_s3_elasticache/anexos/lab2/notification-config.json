@@ -1,0 +1,21 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "Id": "ProcessarUploads",
+      "LambdaFunctionArn": "LAMBDA_ARN_PLACEHOLDER",
+      "Events": [
+        "s3:ObjectCreated:*"
+      ],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

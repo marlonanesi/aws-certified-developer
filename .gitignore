@@ -1,0 +1,119 @@
+# ─── Sistema Operacional ──────────────────────────────────────────────────────
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+
+# ─── Editores e IDEs ──────────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# ─── Arquivos temporários e logs ──────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv/
+venv/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ─── Node.js ──────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+package-lock.json
+
+# ─── Terraform / IaC ──────────────────────────────────────────────────────────
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+
+# ─── AWS ──────────────────────────────────────────────────────────────────────
+.aws/
+aws-exports.js
+amplify/
+#sam-related
+.aws-sam/
+samconfig.toml
+
+# ─── Arquivos comprimidos ─────────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.tar
+*.rar
+*.7z
+
+# ─── Compiláveis e binários ───────────────────────────────────────────────────
+*.exe
+*.dll
+*.so
+*.dylib
+*.class
+*.jar
+*.war
+*.o
+*.obj
+
+# ─── PowerShell ───────────────────────────────────────────────────────────────
+# Manter scripts .ps1 mas ignorar saídas
+*.ps1xml
+
+# ─── PDFs gerados (opcional — remova esta linha se quiser versionar os PDFs) ──
+# *.pdf
+
+# ─── Jupyter Notebooks (checkpoints) ─────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── Credenciais e segredos ───────────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+.env
+secrets.json
+credentials

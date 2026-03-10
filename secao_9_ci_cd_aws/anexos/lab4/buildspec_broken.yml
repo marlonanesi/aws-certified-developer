@@ -1,0 +1,9 @@
+version: 0.2
+# buildspec_broken.yml — Buildspec que força falha intencional
+# Usado na Parte 6 do Lab 4 para testar notificações de falha e restaurar depois.
+# NÃO use como buildspec principal — apenas para o commit de teste de falha.
+phases:
+  build:
+    commands:
+      - echo "Simulando falha de build..."
+      - exit 1

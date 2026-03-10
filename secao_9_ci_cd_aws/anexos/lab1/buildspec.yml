@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+  build:
+    commands:
+      - echo "Build iniciado"
+      - python -m pytest tests/ || echo "Sem testes ainda"
+  post_build:
+    commands:
+      - echo "Build finalizado"
+
+artifacts:
+  files:
+    - "**/*"

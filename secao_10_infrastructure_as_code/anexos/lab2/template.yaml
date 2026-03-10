@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lab 2 - API de Todo List com SAM
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref TodoTable
+
+Resources:
+
+  TodoTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 3
+        WriteCapacityUnits: 3
+
+  ListTodosFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.list_todos
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTable
+      Events:
+        ListApi:
+          Type: HttpApi
+          Properties:
+            Path: /todos
+            Method: get
+
+  CreateTodoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.create_todo
+      CodeUri: src/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TodoTable
+      Events:
+        CreateApi:
+          Type: HttpApi
+          Properties:
+            Path: /todos
+            Method: post
+
+Outputs:
+  ApiUrl:
+    Description: URL da API
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+  TableName:
+    Description: Nome da tabela DynamoDB
+    Value: !Ref TodoTable
