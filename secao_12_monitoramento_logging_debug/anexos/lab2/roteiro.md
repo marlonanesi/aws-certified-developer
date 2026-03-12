@@ -27,7 +27,7 @@ Comparar as duas formas de publicar métricas customizadas no CloudWatch: `PutMe
 ---
 ## Parte 1 — PutMetricData via Python (SDK)
 
-O arquivo `put_metric.py` publica 10 pontos em Standard Resolution (`StorageResolution=60`) e 5 pontos em High-Resolution (`StorageResolution=1`).
+O arquivo `put_metric.py` publica 10 pontos em Standard Resolution (`StorageResolution=60`) e 5 pontos em High-Resolution (`StorageResolution=1`). Antes de executar, abra o arquivo e ajuste a variável `REGION` no topo para a região que você está usando.
 
 ```
 python put_metric.py
@@ -74,6 +74,15 @@ Anote o ARN da role retornado (`arn:aws:iam::<ACCOUNT_ID>:role/lab-emf-role`).
 ---
 ## Parte 3 — Empacotar e Fazer Deploy da Lambda EMF
 
+Antes de criar a função, obtenha o Account ID e a região configurados:
+
+```
+aws sts get-caller-identity --query Account --output text
+aws configure get region
+```
+
+Substitua `<ACCOUNT_ID>` e `<REGION>` nos comandos desta parte pelos valores retornados acima.
+
 Instale a dependência `aws-embedded-metrics` no diretório do pacote:
 
 ```
@@ -118,6 +127,8 @@ aws lambda update-function-configuration --function-name lab-emf-demo --tracing-
 
 ---
 ## Parte 4 — Invocar a Lambda e Observar as Métricas EMF
+
+> No PowerShell com AWS CLI v2, o parâmetro `--payload` com JSON inline requer a flag `--cli-binary-format raw-in-base64-out`. Adicione-a após `--payload '...'` em cada comando abaixo, ou salve o payload em um arquivo e use `--payload file://payload.json`.
 
 Invocar individualmente com diferentes orderId:
 

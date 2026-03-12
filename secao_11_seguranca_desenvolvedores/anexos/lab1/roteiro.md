@@ -104,7 +104,7 @@ aws s3 ls
 ---
 ## Parte 4 – AssumeRole via SDK Python
 
-Execute o script `assume_role.py` incluído nesta pasta:
+Antes de executar, abra `assume_role.py` e edite a variável `ROLE_ARN` no topo do arquivo, substituindo `<DESTINO_ID>` pelo Account ID da conta destino.
 
 ```
 python assume_role.py
@@ -113,8 +113,6 @@ python assume_role.py
 > No Linux/macOS use `python3 assume_role.py` se `python` não estiver mapeado.
 
 O script realiza o assume, exibe as credenciais temporárias e lista os buckets S3 da conta destino.
-
-Substitua `<DESTINO_ID>` no script antes de executar.
 
 ---
 ## Parte 5 – Verificar Identidade e Restaurar Credenciais
@@ -160,11 +158,13 @@ aws sts get-caller-identity
 ## Limpeza
 
 ```
-# Na conta destino: deletar o role
-aws iam delete-role --role-name CrossAccountS3Role
-# (se houver policy inline, removê-la antes com delete-role-policy)
+# Na conta destino: desanexar a policy gerenciada antes de deletar o role
+aws iam detach-role-policy --role-name CrossAccountS3Role --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
 
-# Na conta origem: remover a policy de assume role do usuário/role
+# Deletar o role
+aws iam delete-role --role-name CrossAccountS3Role
+
+# Na conta origem: remover a policy de sts:AssumeRole do usuário/role (inline ou gerenciada)
 ```
 
 > Funciona em Bash e PowerShell sem adaptação.

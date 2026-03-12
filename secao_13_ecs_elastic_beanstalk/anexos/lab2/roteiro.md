@@ -64,6 +64,8 @@ compõem o pacote que será enviado ao Elastic Beanstalk.
 
 ## Parte 1 — Preparar e Testar a Aplicação Localmente
 
+> Todos os comandos deste lab devem ser executados a partir do diretório `lab2/`. Abra o terminal nessa pasta antes de começar.
+
 ### 1.1 — Criar ambiente virtual Python e instalar dependências
 
 **PowerShell (Windows):**
@@ -143,7 +145,11 @@ ls -lh deploy-v1.zip
 eb init lab-beanstalk-python `
   --platform "Python 3.11 running on 64bit Amazon Linux 2023" `
   --region us-east-1
+```
 
+> O comando `eb init` pode perguntar se você deseja configurar um SSH key pair. Para este lab, pressione **Enter** para pular (acesso à instância pode ser feito pelo Session Manager).
+
+```powershell
 # Criar o ambiente (pode levar 5-10 minutos)
 eb create lab-env-producao `
   --instance-type t3.micro `
@@ -160,7 +166,11 @@ eb events -f
 eb init lab-beanstalk-python \
   --platform "Python 3.11 running on 64bit Amazon Linux 2023" \
   --region us-east-1
+```
 
+> O comando `eb init` pode perguntar se você deseja configurar um SSH key pair. Para este lab, pressione **Enter** para pular.
+
+```bash
 # Criar o ambiente (pode levar 5-10 minutos)
 eb create lab-env-producao \
   --instance-type t3.micro \
@@ -174,6 +184,12 @@ eb events -f
 > `--single` cria um ambiente sem Load Balancer (instância única).
 > Remova `--single` para criar com Load Balancer e Auto Scaling, necessário para
 > testar as deployment policies Rolling e Immutable.
+
+> Se já criou com `--single` e deseja recriar com Load Balancer, encerre o ambiente atual e crie novamente sem a flag:
+> ```
+> eb terminate lab-env-producao --force
+> eb create lab-env-producao --instance-type t3.micro --timeout 20
+> ```
 
 ### Opção B — Via AWS CLI
 
@@ -294,7 +310,7 @@ Acesse a URL exibida no campo `URL` no navegador.
 ## Parte 4 — Explorar as Deployment Policies
 
 Para esta parte, você precisa de um ambiente **com Load Balancer** (sem `--single`).
-Se criou com `--single`, recrie o ambiente sem essa flag.
+Se criou com `--single`, veja a nota ao final da Opção A na Parte 3 para recriar o ambiente.
 
 ### 4.1 — Criar versão 2 da aplicação
 
@@ -321,11 +337,11 @@ All at Once atualiza todas as instâncias simultaneamente — **gera downtime**.
 Use apenas em desenvolvimento.
 
 ```
-# Via EB CLI
+# Via EB CLI — implanta o código e aplica a política em uma única operação
 eb deploy lab-env-producao --label v2-all-at-once
 ```
 
-Via AWS CLI — alterar a política antes do deploy:
+Alternativamente, via AWS CLI — os comandos abaixo alteram **apenas a configuração da política**, sem implantar código. Execute-os antes de realizar o deploy do ZIP via console ou `eb deploy`:
 
 **PowerShell:**
 ```powershell
@@ -349,6 +365,8 @@ aws elasticbeanstalk update-environment \
 
 Rolling atualiza um batch por vez, mantendo o restante em serviço.
 Capacidade reduzida durante o deploy, mas **sem downtime**.
+
+> Os blocos AWS CLI abaixo alteram apenas a configuração; use `eb deploy` para acionar o deploy após a mudança.
 
 **PowerShell:**
 ```powershell
@@ -379,6 +397,8 @@ aws elasticbeanstalk update-environment \
 Immutable cria um novo Auto Scaling Group com instâncias na nova versão.
 Após validação, migra o tráfego e termina as instâncias antigas.
 **Rollback instantâneo** — sem downtime — custo mais alto (dobra instâncias temporariamente).
+
+> Os blocos AWS CLI abaixo alteram apenas a configuração; use `eb deploy` para acionar o deploy após a mudança.
 
 **PowerShell:**
 ```powershell

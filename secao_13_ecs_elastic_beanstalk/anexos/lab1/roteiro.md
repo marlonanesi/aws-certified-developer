@@ -44,6 +44,8 @@ Verificar configuração:
 aws sts get-caller-identity
 ```
 
+> Todos os comandos das partes 1 a 4 usam caminhos relativos (`file://iam-trust-policy.json`, `file://user_data.sh`). Execute-os a partir do diretório `lab1/`, ou ajuste os caminhos para absolutos.
+
 ---
 
 ## Parte 1 — Criar a IAM Role para a Instância EC2
@@ -316,7 +318,7 @@ sudo cat /var/log/cloud-init-output.log | tail -30
 
 ## Parte 8 — Verificar Informações da Instância via CLI (de fora)
 
-Saia da sessão SSM (`exit`) e execute no PowerShell local:
+Digite `exit` para encerrar a sessão SSM e retornar ao terminal local, depois execute no PowerShell:
 
 ```powershell
 # Visão geral da instância

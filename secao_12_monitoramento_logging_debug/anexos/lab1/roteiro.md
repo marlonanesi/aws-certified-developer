@@ -63,7 +63,7 @@ aws cloudwatch put-metric-data --namespace "MeuCurso/Lab" --metric-name "Pedidos
 ---
 ## Parte 3 — Publicar Métrica via Python
 
-O arquivo `put_metric_data.py` publica uma série de 10 pontos em Standard Resolution e depois 3 pontos em High-Resolution, demonstrando a diferença de granularidade.
+O arquivo `put_metric_data.py` publica uma série de 10 pontos em Standard Resolution e depois 3 pontos em High-Resolution, demonstrando a diferença de granularidade. Antes de executar, abra o arquivo e ajuste a variável `REGION` no topo para a região que você está usando.
 
 ```
 python put_metric_data.py
@@ -109,7 +109,13 @@ Criar tópico SNS para receber notificações:
 aws sns create-topic --name lab-cloudwatch-alarmes
 ```
 
-Anote o ARN retornado (`arn:aws:sns:<REGION>:<ACCOUNT_ID>:lab-cloudwatch-alarmes`) e Subscribe com seu e-mail:
+A saída exibe o ARN completo do tópico. Nos comandos abaixo e no alarme da próxima etapa, substitua `<REGION>` pela sua região e `<ACCOUNT_ID>` pelo valor retornado por:
+
+```
+aws sts get-caller-identity --query Account --output text
+```
+
+Inscreva seu e-mail no tópico para receber notificações:
 
 ```
 aws sns subscribe --topic-arn arn:aws:sns:<REGION>:<ACCOUNT_ID>:lab-cloudwatch-alarmes --protocol email --notification-endpoint seu@email.com

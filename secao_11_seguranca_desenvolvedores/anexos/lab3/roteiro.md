@@ -23,9 +23,11 @@ Criar uma API REST no API Gateway protegida por Cognito User Pool Authorizer. Re
 ---
 ## Pré-requisitos
 
-- Lab 2 concluído (User Pool configurado e usuário criado)
 - AWS CLI configurado com permissões em Lambda, API Gateway e IAM
 - `curl` ou Postman instalado
+- **User Pool do Lab 2 ativo** com o usuário `testuser@exemplo.com` e o App Client `lab2-cli-client` (sem secret) criados
+
+> Se a limpeza do Lab 2 foi executada e o User Pool foi deletado, recrie-o seguindo a Parte 1 do Lab 2 completa (incluindo a criação do `lab2-cli-client` via CLI). Não é necessário repetir as Partes 2 a 6 do Lab 2.
 
 ---
 ## Parte 1 – Criar a Função Lambda Backend
@@ -33,8 +35,7 @@ Criar uma API REST no API Gateway protegida por Cognito User Pool Authorizer. Re
 1. Console AWS → **Lambda → Create function** ("Criar função")
 2. Function name: `lab3-backend`
 3. Runtime: Python 3.12
-4. Cole o código do arquivo `lambda_backend.py` incluído nesta pasta
-5. Deploy
+4. No editor de código inline (Code source → Edit code inline), substitua o conteúdo pelo do arquivo `lambda_backend.py` desta pasta; clique em **Deploy**
 
 ---
 ## Parte 2 – Criar a API REST
@@ -46,37 +47,55 @@ Criar uma API REST no API Gateway protegida por Cognito User Pool Authorizer. Re
    - Integration type: Lambda Function
    - Lambda Function: `lab3-backend`
    - ✅ Use Lambda Proxy Integration
-5. **Actions → Deploy API**
-   - Stage: `prod`
-6. Anote a **Invoke URL**: `https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod`
+5. **Actions → Deploy API / Implantar API**
+   - Stage: `prod` / Novo Estágio
+6. Anote a **Invoke URL**: `https://<API_URL>.execute-api.<REGION>.amazonaws.com/prod`
 
 ---
 ## Parte 3 – Configurar o Cognito Authorizer
 
-1. No painel da API → **Authorizers → Create New Authorizer** ("Criar novo autorizador")
-2. Name: `lab3-cognito-auth`
-3. Type: **Cognito**
-4. Cognito User Pool: selecionar o pool criado no Lab 2
-5. Token Source: `Authorization`
-6. **Create**
+1. No painel da API → **Autorizadores** → **Criar autorizador**
+2. **"Nome do autorizador"**: `lab3-cognito-auth`
+3. **"Tipo de autorizador"**: selecionar **Cognito**
+4. **"Grupo de usuários do Cognito"**: selecionar a região `sa-east-1` e o pool criado no Lab 2
+5. **"Origem do token"**: digitar `Authorization` — é o nome do header HTTP que conterá o token JWT
+6. **"Validação de token"**: deixar em branco
+7. Clique em **"Criar autorizador"**
 
 ---
 ## Parte 4 – Aplicar o Authorizer no Método GET
 
-1. **Resources → /items → GET → Method Request**
-2. Authorization: selecionar `lab3-cognito-auth`
-3. Salvar
-4. **Actions → Deploy API** ("Implantar API") (reimplantar em `prod` para aplicar a mudança)
+1. No menu lateral, clique em **"Recursos"**
+2. Na árvore de recursos, selecione **GET** abaixo de `/items`
+3. No painel à direita, clique em **"Solicitação de método"** ("Method Request")
+4. Clique em **"Editar"**
+5. No campo **"Autorizador"**, selecione `lab3-cognito-auth`
+6. Clique em **"Salvar"**
+7. No menu lateral, clique em **"Recursos"** → botão **"Implantar API"** → estágio `prod` → **"Implantar"**
 
 ---
 ## Parte 5 – Testar com e sem Token
 
+Defina as variáveis antes de executar os testes. Substitua pelos valores reais:
+
+**PowerShell:**
+```powershell
+$API_URL = "https://<API_URL>.execute-api.<REGION>.amazonaws.com/prod"
+$USER_POOL_ID = "<USER_POOL_ID>"
+$APP_CLIENT_ID = "<APP_CLIENT_ID_DO_lab2-cli-client>"  # App Client sem secret criado no Lab 2
+```
+
+**Bash:**
+```bash
+API_URL="https://<API_URL>.execute-api.<REGION>.amazonaws.com/prod"
+USER_POOL_ID="<USER_POOL_ID>"
+APP_CLIENT_ID="<APP_CLIENT_ID_DO_lab2-cli-client>"  # App Client sem secret criado no Lab 2
+```
+
+Em seguida, execute os testes:
+
 **PowerShell (Windows):**
 ```powershell
-$API_URL = "https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod"
-$USER_POOL_ID = "<USER_POOL_ID>"
-$APP_CLIENT_ID = "<APP_CLIENT_ID>"
-
 # Testar SEM token — deve retornar 401
 curl.exe -X GET "$API_URL/items"
 
@@ -92,10 +111,6 @@ curl.exe -X GET "$API_URL/items" -H "Authorization: Bearer token_invalido"
 
 **Bash (Linux/macOS/Git Bash/WSL):**
 ```bash
-API_URL="https://<API_ID>.execute-api.<REGION>.amazonaws.com/prod"
-USER_POOL_ID="<USER_POOL_ID>"
-APP_CLIENT_ID="<APP_CLIENT_ID>"
-
 # Testar SEM token — deve retornar 401
 curl -X GET "$API_URL/items"
 
@@ -128,15 +143,42 @@ Observe que:
 ---
 ## Limpeza
 
-```
+**PowerShell:**
+```powershell
 # Deletar a API
-aws apigateway delete-rest-api --rest-api-id <API_ID>
+aws apigateway delete-rest-api --rest-api-id <API_URL>
 
 # Deletar a Lambda
 aws lambda delete-function --function-name lab3-backend
 
 # Deletar o User Pool (se não for usado em outros labs)
-aws cognito-idp delete-user-pool --user-pool-id <USER_POOL_ID>
+# 1. Desativar proteção contra exclusão
+aws cognito-idp update-user-pool --user-pool-id $USER_POOL_ID --deletion-protection INACTIVE
+
+# 2. Obter e deletar o domínio
+$DOMAIN = aws cognito-idp describe-user-pool --user-pool-id $USER_POOL_ID --query 'UserPool.Domain' --output text
+aws cognito-idp delete-user-pool-domain --domain $DOMAIN --user-pool-id $USER_POOL_ID
+
+# 3. Deletar o User Pool
+aws cognito-idp delete-user-pool --user-pool-id $USER_POOL_ID
 ```
 
-> Todos os comandos acima funcionam em Bash e PowerShell. Use `$USER_POOL_ID` (PS) ou `$USER_POOL_ID` (Bash) se a variável ainda estiver definida na sessão.
+**Bash:**
+```bash
+# Deletar a API
+aws apigateway delete-rest-api --rest-api-id <API_URL>
+
+# Deletar a Lambda
+aws lambda delete-function --function-name lab3-backend
+
+# Deletar o User Pool (se não for usado em outros labs)
+# 1. Desativar proteção contra exclusão
+aws cognito-idp update-user-pool --user-pool-id $USER_POOL_ID --deletion-protection INACTIVE
+
+# 2. Obter e deletar o domínio
+DOMAIN=$(aws cognito-idp describe-user-pool --user-pool-id $USER_POOL_ID --query 'UserPool.Domain' --output text)
+aws cognito-idp delete-user-pool-domain --domain $DOMAIN --user-pool-id $USER_POOL_ID
+
+# 3. Deletar o User Pool
+aws cognito-idp delete-user-pool --user-pool-id $USER_POOL_ID
+```

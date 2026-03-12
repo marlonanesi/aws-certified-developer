@@ -19,7 +19,7 @@ import boto3
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 KEY_ALIAS = "alias/lab4-cmk"
-REGION = "us-east-1"  # ajuste para sua região
+REGION = "sa-east-1"  # ajuste para sua região se necessário
 
 
 def get_kms_client():

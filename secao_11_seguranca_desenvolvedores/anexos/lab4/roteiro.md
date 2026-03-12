@@ -34,7 +34,7 @@ Criar uma Customer Managed Key (CMK) no AWS KMS e utilizá-la para:
 - Conta AWS com permissões em KMS, S3 e Lambda
 - AWS CLI configurado
 - Python 3 com `boto3` instalado
-- `cryptography` instalado: `pip install cryptography`
+- `cryptography` instalado: `pip install boto3 cryptography`
 
 ---
 ## Parte 1 – Criar a CMK
@@ -43,6 +43,12 @@ Criar uma Customer Managed Key (CMK) no AWS KMS e utilizá-la para:
 ```powershell
 # Criar CMK simétrica (ENCRYPT_DECRYPT)
 $KEY_ID = aws kms create-key --description "Lab4 - CMK de demonstracao" --key-usage ENCRYPT_DECRYPT --query 'KeyMetadata.KeyId' --output text
+
+# Caso a chave já exista e precisa apenas capturar ela novamente
+$KEY_ID = aws kms list-keys --query 'Keys[0].KeyId' --output text
+# ou liste todas para identificar a certa:
+aws kms list-keys
+aws kms describe-key --key-id <KEY_ID>
 
 Write-Output "Key ID: $KEY_ID"
 
@@ -109,7 +115,8 @@ echo "$DECRYPTED" | base64 -d
 rm encrypted.bin
 ```
 
-Para a demonstração completa via Python, execute:
+Para a demonstração completa via Python, abra `kms_demo.py` e **confirme que a variável `REGION` no topo do arquivo corresponde à região onde a CMK foi criada** (`sa-east-1` neste lab), depois execute a partir do diretório `lab4`:
+
 ```
 python kms_demo.py
 ```
@@ -127,7 +134,7 @@ O script `kms_demo.py` demonstra o fluxo completo:
 4. **Armazenar** os dados cifrados + data key cifrada (o KMS não armazena nada)
 5. **Descriptografar:** chamar `kms.decrypt()` para recuperar a data key → usar para decifrar os dados
 
-Execute a seção de envelope encryption:
+Execute a seção de envelope encryption a partir do diretório `lab4`:
 ```
 python kms_demo.py --action envelope
 ```
@@ -172,15 +179,19 @@ aws s3api head-object --bucket $BUCKET --key arquivo-cmk.md
 
 > Os campos relevantes na resposta: `ServerSideEncryption` e `SSEKMSKeyId`.
 
+> Os comandos `aws s3 cp roteiro.md` acima assumem que o terminal está no diretório `lab4`. Ajuste o caminho se necessário.
+
 ---
 ## Parte 5 – Lambda com Variáveis de Ambiente Criptografadas
 
-1. Console → **Lambda → Create function** ("Criar função") → name: `lab4-lambda` → Runtime: Python 3.12
-2. **Configuration** ("Configuração") **→ Environment variables** ("Variáveis de ambiente") **→ Edit** ("Editar")
-3. Adicionar: `DB_PASSWORD` = `MinhaS3nh@123`
-4. Expandir **Encryption configuration** → selecionar `alias/lab4-cmk`
-5. Salvar
-6. Usar o código:
+### 5.1 – Criar a função e adicionar a variável
+
+1. Console → **Lambda → Funções → Criar função**
+2. **"Nome da função"**: `lab4-lambda`
+3. **"Runtime"**: Python 3.12
+4. Clique em **"Criar função"**
+5. Na aba **"Código"**, substitua o conteúdo do editor pelo código abaixo e clique em **"Deploy"**:
+
 ```python
 import os
 
@@ -192,7 +203,45 @@ def lambda_handler(event, context):
     }
 ```
 
-O valor é decriptado automaticamente pela Lambda no momento da inicialização usando a CMK.
+> O código retorna apenas o comprimento da senha — nunca o valor em si. Isso representa a prática correta: ler a variável e usá-la sem expô-la em logs ou respostas.
+
+### 5.2 – Configurar a variável de ambiente com criptografia
+
+1. Aba **"Configuração"** → **"Variáveis de ambiente"** → **"Editar"**
+2. Clique em **"Adicionar variáveis de ambiente"**
+   - **Chave**: `DB_PASSWORD`
+   - **Valor**: `MinhaS3nh@123`
+3. Na seção **"Configuração da criptografia"**:
+   - **"Criptografia em trânsito"**: deixar desmarcado (usado apenas para proteger o valor durante a transmissão pelo console — não necessário para o lab)
+   - **"Chave do AWS KMS para criptografar em repouso"**: selecionar **"Use uma chave mestra de cliente"** → escolher `alias/lab4-cmk`
+4. Clique em **"Salvar"**
+
+> Com `(padrão) aws/lambda` selecionado, a AWS criptografa a variável usando uma chave gerenciada por ela. Ao selecionar `alias/lab4-cmk`, você passa a controlar quem pode descriptografar — qualquer entidade sem a permissão `kms:Decrypt` na CMK será bloqueada.
+
+### 5.3 – Testar a função
+
+1. Na aba **"Teste"**, clique em **"Criar evento de teste"**
+   - **"Nome do evento"**: `teste-lab4`
+   - Manter o corpo JSON padrão `{}`
+   - Clique em **"Salvar"**
+2. Clique em **"Testar"**
+3. A resposta esperada:
+```json
+{
+  "statusCode": 200,
+  "body": "Password length: 13"
+}
+```
+
+O comprimento `13` corresponde a `MinhaS3nh@123` (13 caracteres). Isso confirma que a Lambda descriptografou automaticamente a variável em tempo de execução usando a CMK — sem nenhuma chamada explícita ao KMS no código.
+
+### 5.4 – Entender o que acontece "por baixo"
+
+- A variável `DB_PASSWORD` fica armazenada **cifrada** no serviço Lambda usando `alias/lab4-cmk`
+- No momento em que a função é inicializada, a Lambda chama o KMS para descriptografar — essa chamada aparece nos logs do CloudTrail
+- Se a permissão `kms:Decrypt` for revogada da role da Lambda, a próxima inicialização falhará com erro de acesso
+
+> **Ponto didático:** trocar entre `aws/lambda` e uma CMK própria **não altera o resultado da função** — o `Password length: 13` será o mesmo nos dois casos. A diferença é de controle e auditoria: com a chave padrão, a AWS gerencia tudo de forma opaca; com a CMK própria, você controla quem pode descriptografar via Key Policy, e cada uso da chave fica registrado individualmente no CloudTrail. O lab serve para mostrar que esse controle existe e como ativá-lo — não para mudar o comportamento funcional.
 
 ---
 ## Pontos de Verificação
@@ -204,6 +253,10 @@ O valor é decriptado automaticamente pela Lambda no momento da inicialização 
 
 ---
 ## Limpeza
+
+> `$KEY_ID` e `$BUCKET` devem estar definidos da sessão atual. Se iniciou um novo terminal, redefina:
+> - **PowerShell:** `$KEY_ID = "<KEY_ID>"` e `$BUCKET = "<BUCKET_NAME>"`
+> - **Bash:** `KEY_ID="<KEY_ID>"` e `BUCKET="<BUCKET_NAME>"`
 
 **PowerShell:**
 ```powershell

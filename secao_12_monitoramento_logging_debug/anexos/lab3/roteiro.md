@@ -68,6 +68,14 @@ aws iam attach-role-policy --role-name lab-xray-role --policy-arn arn:aws:iam::a
 ---
 ## Parte 2 — Empacotar e Fazer Deploy da Lambda
 
+Antes de criar a função, obtenha o Account ID:
+
+```
+aws sts get-caller-identity --query Account --output text
+```
+
+Substitua `<ACCOUNT_ID>` nos comandos desta parte pelo valor retornado acima.
+
 Instale a dependência no diretório do pacote:
 
 ```
@@ -122,6 +130,8 @@ aws lambda get-function-configuration --function-name lab-xray-demo --query "Tra
 ---
 ## Parte 4 — Gerar Traces
 
+> No PowerShell com AWS CLI v2, o parâmetro `--payload` com JSON inline requer a flag `--cli-binary-format raw-in-base64-out`. Adicione-a após `--payload '...'` em cada comando abaixo, ou salve o payload em um arquivo e use `--payload file://payload.json`.
+
 Invocar com diferentes orderId para gerar histórico de traces:
 
 ```
@@ -153,7 +163,8 @@ aws lambda invoke --function-name lab-xray-demo --payload '{"orderId": "ERR-001"
 ### Traces
 
 1. Acesse **X-Ray → Traces**.
-2. Filtre por annotation: `annotation.orderId = "ORD-003"`.
+2. No campo de filtro exibido no topo da lista de traces, digite a expressão abaixo e pressione Enter:
+   `annotation.orderId = "ORD-003"`
 3. Abra o trace e observe a hierarquia de segmentos:
    - Segmento Lambda (duração total)
    - Subsegmento `validacao-pedido` (~20 ms)

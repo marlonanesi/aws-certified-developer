@@ -45,7 +45,7 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": "Conexão simulada com sucesso",
+            "message": "Conexao simulada com sucesso",
             "host": credentials.get("host"),
             "port": credentials.get("port"),
             "username": credentials.get("username"),

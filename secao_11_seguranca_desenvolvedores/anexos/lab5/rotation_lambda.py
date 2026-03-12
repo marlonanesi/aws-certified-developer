@@ -43,7 +43,7 @@ def lambda_handler(event, context):
     step = event["Step"]
 
     client = boto3.client("secretsmanager")
-    logger.info(f"Rotação iniciada | secret={secret_id} | step={step}")
+    logger.info(f"Rotacao iniciada | secret={secret_id} | step={step}")
 
     if step == "createSecret":
         # Verificar se a versão AWSPENDING já existe (idempotência)
@@ -51,7 +51,7 @@ def lambda_handler(event, context):
         versions = metadata.get("VersionIdsToStages", {})
         if token in versions:
             if "AWSPENDING" in versions[token]:
-                logger.info("Versão AWSPENDING já existe — pulando createSecret")
+                logger.info("Versao AWSPENDING ja existe — pulando createSecret")
                 return
 
         # Obter credenciais atuais e gerar nova senha
@@ -69,21 +69,21 @@ def lambda_handler(event, context):
             SecretString=json.dumps(current_value),
             VersionStages=["AWSPENDING"],
         )
-        logger.info("Nova versão AWSPENDING criada com senha gerada")
+        logger.info("Nova versao AWSPENDING criada com senha gerada")
 
     elif step == "setSecret":
         # Em produção: conectar ao banco com a senha AWSPENDING e atualizá-la
         # pending = json.loads(client.get_secret_value(SecretId=secret_id,
         #     VersionStage='AWSPENDING')['SecretString'])
         # db.update_password(pending['username'], pending['password'])
-        logger.info("setSecret: atualização no banco simulada")
+        logger.info("setSecret: atualizacao no banco simulada")
 
     elif step == "testSecret":
         # Em produção: testar conexão com a senha AWSPENDING
         # pending = json.loads(client.get_secret_value(SecretId=secret_id,
         #     VersionStage='AWSPENDING')['SecretString'])
         # db.connect(pending['host'], pending['username'], pending['password'])
-        logger.info("testSecret: teste de conexão simulado")
+        logger.info("testSecret: teste de conexao simulado")
 
     elif step == "finishSecret":
         # Descobrir a versão atual
@@ -101,7 +101,7 @@ def lambda_handler(event, context):
             MoveToVersionId=token,
             RemoveFromVersionId=current_version,
         )
-        logger.info(f"Rotação concluída | nova versão AWSCURRENT: {token}")
+        logger.info(f"Rotacao concluida | nova versao AWSCURRENT: {token}")
 
     else:
         raise ValueError(f"Step desconhecido: {step}")
