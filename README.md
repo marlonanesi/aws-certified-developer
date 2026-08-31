@@ -8,6 +8,12 @@ Curso completo em **português brasileiro** preparatório para a certificação 
 > Caso utilize outro ambiente, é possível usar uma ferramenta de **GenAI** (como o próprio GitHub Copilot) para converter os comandos para o formato desejado. 🤖
 
 ---
+Curso completo na Udemy com nosso cupom mensal dinâmico:
+https://cloudforall.com.br/redirect/aws-developer-associate-dva-c02/
+Curso de simulados completo na Udemy com nosso cupom mensal dinâmico (totalmente atualizado em set/2026, explicações, dicas por opção de resposta e diagramas e anexos visuais para cada questão):
+https://cloudforall.com.br/redirect/aws-developer-associate-dva-c02-simulados/
+
+
 
 ## 📁 Organização do Curso
 
